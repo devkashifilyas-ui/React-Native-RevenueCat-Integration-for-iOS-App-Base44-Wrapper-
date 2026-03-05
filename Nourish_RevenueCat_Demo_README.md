@@ -156,12 +156,3 @@ Subscription architecture
 Paywall behavior  
 Entitlement validation  
 Purchase lifecycle
-
----
-
-## Author
-
-Kashif Ilyas  
-Senior Mobile and Full Stack Developer
-
-Specializing in mobile architecture, React Native applications, and subscription based app monetization systems.
