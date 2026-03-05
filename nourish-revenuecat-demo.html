@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Nourish — RevenueCat Integration Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #f5f8f2;
+  --white: #ffffff;
+  --dark: #1a2214;
+  --mid: #2d3d24;
+  --text: #1a2214;
+  --muted: #7a8a6e;
+  --muted2: #a8b89a;
+  --border: #e2ebd8;
+  --border2: #cddabf;
+  --green: #3d7a2e;
+  --green-light: #e8f3e2;
+  --green-glow: rgba(61,122,46,0.12);
+  --accent: #4ca336;
+  --accent-mid: #3d7a2e;
+  --amber: #d97706;
+  --red: #dc2626;
+  --gold: #b45309;
+  --code-bg: #1a2214;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 8px rgba(26,34,20,0.06);
+}
+.tb-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 20px;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tb-leaf { font-size: 18px; }
+.tb-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  background: var(--green-light);
+  color: var(--green);
+  border: 1px solid rgba(61,122,46,0.2);
+  padding: 2px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
+}
+.tb-nav { display: flex; gap: 2px; }
+.tb-tab {
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--muted);
+}
+.tb-tab:hover { color: var(--text); background: var(--bg); }
+.tb-tab.active { background: var(--green-light); color: var(--green); font-weight: 600; }
+
+/* ── LAYOUT ── */
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: calc(100vh - 56px);
+  gap: 0;
+}
+.left-col {
+  border-right: 1px solid var(--border);
+  background: var(--white);
+  padding: 28px 24px;
+  position: sticky;
+  top: 56px;
+  height: calc(100vh - 56px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.right-col { padding: 28px 32px; overflow-y: auto; }
+
+/* PHONE FRAME */
+.phone-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.phone {
+  width: 220px;
+  background: var(--dark);
+  border: 2px solid #2e3d22;
+  border-radius: 38px;
+  padding: 10px;
+  box-shadow: 0 20px 50px rgba(26,34,20,0.25);
+  position: relative;
+}
+.phone-notch { width: 60px; height: 6px; background: #0f1a0a; border-radius: 3px; margin: 0 auto 12px; }
+.phone-screen {
+  background: var(--bg);
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 400px;
+  position: relative;
+}
+.screen { display: none; }
+.screen.active { display: block; }
+.phone-home-bar { width: 40px; height: 4px; background: #2e3d22; border-radius: 2px; margin: 10px auto 0; }
+
+/* SCREEN: HOME */
+.s-home { padding: 18px 14px; background: var(--bg); min-height: 400px; }
+.s-home-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.s-app-name { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--dark); }
+.s-avatar {
+  width: 28px; height: 28px;
+  background: linear-gradient(135deg, var(--accent), #2e7d1e);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff; font-weight: 700;
+}
+.s-status-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.s-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.s-status-row:last-child { margin: 0; }
+.s-label { font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted2); font-family: 'DM Mono', monospace; }
+.s-val { font-size: 11px; font-weight: 600; color: var(--text); }
+.s-val.active { color: var(--accent); }
+.s-val.locked { color: var(--red); }
+.s-val.trial { color: var(--amber); }
+
+.s-action-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 11px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.s-action-btn:hover { opacity: 0.85; }
+.s-action-btn.ghost {
+  background: none;
+  color: var(--muted);
+  border: 1px solid var(--border2);
+}
+.s-action-btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.s-action-btn.locked-btn {
+  background: var(--muted2);
+  cursor: default;
+}
+.lock-icon { font-size: 12px; }
+
+/* SCREEN: PAYWALL */
+.s-paywall {
+  background: var(--dark);
+  min-height: 400px;
+  padding: 16px 14px;
+}
+.paywall-header { text-align: center; margin-bottom: 16px; }
+.paywall-leaf { font-size: 28px; margin-bottom: 6px; }
+.paywall-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+.paywall-sub { font-size: 9px; color: #7a8a6e; line-height: 1.5; }
+
+.plan-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 11px 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.plan-card:hover { border-color: var(--accent); }
+.plan-card.selected {
+  border-color: var(--accent);
+  background: rgba(76,163,54,0.1);
+}
+.plan-card.popular::before {
+  content: 'BEST VALUE';
+  position: absolute;
+  top: -9px; right: 10px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 7px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  font-family: 'DM Mono', monospace;
+}
+.plan-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.plan-name { font-size: 11px; font-weight: 700; color: #fff; }
+.plan-price { font-size: 11px; font-weight: 700; color: var(--accent); }
+.plan-period { font-size: 8px; color: #7a8a6e; margin-top: 2px; font-family: 'DM Mono', monospace; }
+.plan-trial { font-size: 8px; color: var(--amber); margin-top: 4px; }
+
+.paywall-btn {
+  width: 100%;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+.paywall-btn:hover { background: var(--accent-mid); }
+.paywall-cancel { font-size: 8px; color: #556655; text-align: center; margin-top: 8px; }
+.paywall-restore { font-size: 9px; color: #7a8a6e; text-align: center; margin-top: 4px; cursor: pointer; text-decoration: underline; }
+
+/* SCREEN: PREMIUM */
+.s-premium {
+  background: var(--bg);
+  min-height: 400px;
+  padding: 18px 14px;
+}
+.s-premium-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  text-align: center;
+}
+.lock-big { font-size: 40px; margin-bottom: 12px; }
+.locked-title { font-family: 'DM Serif Display', serif; font-size: 15px; color: var(--dark); margin-bottom: 6px; }
+.locked-sub { font-size: 10px; color: var(--muted); line-height: 1.6; margin-bottom: 14px; }
+.s-premium-unlocked {
+  display: none;
+}
+.scan-result {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.scan-food-name { font-family: 'DM Serif Display', serif; font-size: 14px; color: var(--dark); margin-bottom: 8px; }
+.macro-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.macro-item { background: var(--bg); border-radius: 8px; padding: 8px; text-align: center; }
+.macro-val { font-size: 13px; font-weight: 700; color: var(--accent); }
+.macro-label { font-size: 8px; color: var(--muted2); margin-top: 2px; }
+
+/* SCREEN: DEV PANEL */
+.s-dev {
+  background: var(--code-bg);
+  min-height: 400px;
+  padding: 14px 12px;
+  font-family: 'DM Mono', monospace;
+}
+.dev-header { font-size: 10px; color: #4ca336; font-weight: 700; margin-bottom: 12px; letter-spacing: 1px; }
+.dev-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  padding: 6px 0;
+  font-size: 10px;
+}
+.dev-key { color: #7a8a6e; }
+.dev-val { color: #c3e88d; font-weight: 500; }
+.dev-val.red { color: #f07178; }
+.dev-val.amber { color: #ffcb6b; }
+.dev-val.green { color: #c3e88d; }
+.dev-divider { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
+.dev-log {
+  font-size: 9px;
+  line-height: 2;
+  color: #3d4a30;
+}
+.dev-log .ok { color: #22c55e; }
+.dev-log .info { color: #82aaff; }
+.dev-log .warn { color: #ffcb6b; }
+
+/* ── RIGHT COL: PANELS ── */
+.panel-set { display: none; }
+.panel-set.active { display: block; }
+
+/* INTEGRATION OVERVIEW */
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: 30px;
+  color: var(--dark);
+  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+}
+.section-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.7;
+  max-width: 560px;
+}
+
+.cards-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.cards-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+
+.info-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  transition: all 0.2s;
+}
+.info-card:hover { border-color: var(--border2); box-shadow: 0 2px 12px rgba(26,34,20,0.06); }
+.ic-icon { font-size: 22px; margin-bottom: 10px; }
+.ic-title { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.ic-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.ic-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 10px; }
+.ic-tag {
+  background: var(--green-light);
+  color: var(--green);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: 'DM Mono', monospace;
+}
+.ic-tag.grey { background: var(--border); color: var(--muted); }
+.ic-tag.amber { background: rgba(217,119,6,0.1); color: var(--amber); }
+
+/* CODE BLOCKS */
+.code-block {
+  background: var(--code-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.cb-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.cb-dot { width: 8px; height: 8px; border-radius: 50%; }
+.cb-r { background: #ef4444; }
+.cb-y { background: #f59e0b; }
+.cb-g { background: #22c55e; }
+.cb-filename { font-family: 'DM Mono', monospace; font-size: 10px; color: #556655; margin-left: 6px; }
+.cb-body {
+  padding: 16px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  line-height: 2;
+  overflow-x: auto;
+}
+.kw { color: #c792ea; }
+.fn { color: #82cfb7; }
+.str { color: #c3e88d; }
+.cm { color: #3d5030; }
+.cls { color: #82aaff; }
+.num { color: #f78c6c; }
+.ok-c { color: #22c55e; }
+
+/* FLOW STEPS */
+.flow-steps { display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+.flow-step {
+  display: flex;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--border);
+  cursor: default;
+  transition: all 0.15s;
+}
+.flow-step:last-child { border: none; }
+.flow-step:hover { padding-left: 4px; }
+.fs-num {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.fs-title { font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+.fs-desc { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.fs-code {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: var(--green-light);
+  color: var(--green);
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: 6px;
+  display: inline-block;
+}
+.fs-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted2); white-space: nowrap; padding-top: 5px; }
+
+/* TIMELINE BARS */
+.timeline-bar {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.tb-header { padding: 14px 18px; border-bottom: 1px solid var(--border); font-weight: 700; font-size: 13px; }
+.tb-body { padding: 16px 18px; }
+.tb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.tb-row:last-child { margin: 0; }
+.tb-label { font-size: 11px; color: var(--muted); min-width: 150px; font-family: 'DM Mono', monospace; }
+.tb-bar-bg { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.tb-bar { height: 100%; border-radius: 4px; }
+.bar-g { background: linear-gradient(90deg, var(--accent), #6abf57); }
+.bar-a { background: linear-gradient(90deg, var(--amber), #fbbf24); }
+.bar-b { background: linear-gradient(90deg, #2563eb, #60a5fa); }
+.tb-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text); min-width: 40px; text-align: right; }
+
+/* STATUS BADGES */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.sb-green { background: var(--green-light); color: var(--green); border: 1px solid rgba(61,122,46,0.2); }
+.sb-amber { background: rgba(217,119,6,0.1); color: var(--amber); border: 1px solid rgba(217,119,6,0.2); }
+.sb-red { background: rgba(220,38,38,0.1); color: var(--red); border: 1px solid rgba(220,38,38,0.2); }
+.sb-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* ARCH DIAGRAM */
+.arch-flow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 20px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+}
+.arch-node {
+  background: var(--green-light);
+  border: 1px solid rgba(61,122,46,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  text-align: center;
+  min-width: 90px;
+}
+.arch-node-icon { font-size: 18px; }
+.arch-node-label { font-size: 10px; font-weight: 700; color: var(--dark); margin-top: 4px; }
+.arch-node-sub { font-size: 8px; color: var(--muted); margin-top: 2px; font-family: 'DM Mono', monospace; }
+.arch-arrow {
+  color: var(--muted2);
+  font-size: 16px;
+  padding: 0 8px;
+  font-weight: 700;
+}
+
+/* TOAST */
+.toast {
+  position: fixed;
+  bottom: 24px; right: 24px;
+  background: var(--dark);
+  color: #fff;
+  border-radius: 14px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 999;
+  transform: translateY(80px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  max-width: 300px;
+  box-shadow: 0 12px 40px rgba(26,34,20,0.3);
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast-ico { font-size: 20px; }
+.toast-title { font-weight: 700; font-size: 13px; margin-bottom: 2px; font-family: 'DM Serif Display', serif; }
+.toast-sub { font-size: 10px; color: #7a8a6e; font-family: 'DM Mono', monospace; }
+
+@media(max-width:900px) {
+  .layout { grid-template-columns: 1fr; }
+  .left-col { position: static; height: auto; }
+  .cards-2,.cards-3 { grid-template-columns: 1fr; }
+  .arch-flow { gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="tb-logo"><span class="tb-leaf">🌿</span> Nourish <span class="tb-badge">RevenueCat Demo</span></div>
+  <div class="tb-nav">
+    <div class="tb-tab active" onclick="setTab('overview',this)">Overview</div>
+    <div class="tb-tab" onclick="setTab('integration',this)">Integration</div>
+    <div class="tb-tab" onclick="setTab('code',this)">Code</div>
+    <div class="tb-tab" onclick="setTab('plan',this)">Delivery Plan</div>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT: PHONE SIMULATOR -->
+  <div class="left-col">
+    <div style="font-family:'DM Serif Display',serif;font-size:15px;color:var(--dark);margin-bottom:4px">Live App Preview</div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Tap the buttons below to navigate screens</div>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+
+          <!-- HOME SCREEN -->
+          <div class="screen active" id="scr-home">
+            <div class="s-home">
+              <div class="s-home-top">
+                <div class="s-app-name">🌿 Nourish</div>
+                <div class="s-avatar">YA</div>
+              </div>
+              <div class="s-status-card">
+                <div class="s-status-row">
+                  <span class="s-label">Subscription</span>
+                  <span class="s-val active" id="home-sub-status">Trial Active</span>
+                </div>
+                <div class="s-status-row">
+                  <span class="s-label">Plan</span>
+                  <span class="s-val" id="home-plan">Monthly</span>
+                </div>
+                <div class="s-status-row">
+                  <span class="s-label">Trial Ends</span>
+                  <span class="s-val trial" id="home-trial">6 days left</span>
+                </div>
+                <div class="s-status-row">
+                  <span class="s-label">Entitlement</span>
+                  <span class="s-val active" id="home-entitlement">✓ premium_access</span>
+                </div>
+              </div>
+              <button class="s-action-btn" onclick="goScreen('premium'); showToast('🍎','Food Scanner','Premium feature unlocked')">
+                🍎 Scan Food
+              </button>
+              <button class="s-action-btn" onclick="goScreen('paywall')">
+                💳 View Plans
+              </button>
+              <button class="s-action-btn ghost" onclick="restorePurchases()">
+                ↩ Restore Purchases
+              </button>
+            </div>
+          </div>
+
+          <!-- PAYWALL SCREEN -->
+          <div class="screen" id="scr-paywall">
+            <div class="s-paywall">
+              <div class="paywall-header">
+                <div class="paywall-leaf">🌿</div>
+                <div class="paywall-title">Unlock Full<br>Nourish</div>
+                <div class="paywall-sub">AI-powered food scanning,<br>nutrition insights & more</div>
+              </div>
+              <div class="plan-card" id="plan-monthly" onclick="selectPlan('monthly')">
+                <div class="plan-row">
+                  <div>
+                    <div class="plan-name">Monthly</div>
+                    <div class="plan-period">com.innerthoughts.nourish.monthly</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="plan-price">$4.99</div>
+                    <div class="plan-period">/ month</div>
+                  </div>
+                </div>
+                <div class="plan-trial">🎁 7-day free trial included</div>
+              </div>
+              <div class="plan-card popular selected" id="plan-annual" onclick="selectPlan('annual')">
+                <div class="plan-row">
+                  <div>
+                    <div class="plan-name">Annual</div>
+                    <div class="plan-period">com.innerthoughts.nourish.annual</div>
+                  </div>
+                  <div style="text-align:right">
+                    <div class="plan-price">$49.99</div>
+                    <div class="plan-period">/ year · save 17%</div>
+                  </div>
+                </div>
+                <div class="plan-trial">🎁 7-day free trial included</div>
+              </div>
+              <button class="paywall-btn" id="paywall-cta" onclick="purchasePlan()">Start Free Trial →</button>
+              <div class="paywall-cancel">Cancel anytime during trial. No charge for 7 days.</div>
+              <div class="paywall-restore" onclick="restorePurchases()">Restore purchases</div>
+            </div>
+          </div>
+
+          <!-- PREMIUM SCREEN -->
+          <div class="screen" id="scr-premium">
+            <div class="s-premium">
+              <div class="s-premium-locked" id="premium-locked">
+                <div class="lock-big">🔒</div>
+                <div class="locked-title">Premium Feature</div>
+                <div class="locked-sub">Subscribe to unlock AI food scanning and nutrition insights</div>
+                <button class="s-action-btn" onclick="goScreen('paywall')">View Plans</button>
+              </div>
+              <div class="s-premium-unlocked" id="premium-unlocked">
+                <div style="font-family:'DM Serif Display',serif;font-size:16px;margin-bottom:12px;color:var(--dark)">🍎 Scan Result</div>
+                <div class="scan-result">
+                  <div class="scan-food-name">Apple (1 medium)</div>
+                  <div class="macro-grid">
+                    <div class="macro-item"><div class="macro-val">95</div><div class="macro-label">Calories</div></div>
+                    <div class="macro-item"><div class="macro-val">25g</div><div class="macro-label">Carbs</div></div>
+                    <div class="macro-item"><div class="macro-val">0.5g</div><div class="macro-label">Protein</div></div>
+                    <div class="macro-item"><div class="macro-val">0.3g</div><div class="macro-label">Fat</div></div>
+                  </div>
+                </div>
+                <div class="scan-result" style="margin-bottom:0">
+                  <div style="font-size:11px;color:var(--muted);font-weight:600;margin-bottom:4px">AI Insight</div>
+                  <div style="font-size:11px;color:var(--text);line-height:1.6">Great source of fiber and vitamin C. Low glycemic index — ideal for steady energy.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DEV PANEL SCREEN -->
+          <div class="screen" id="scr-dev">
+            <div class="s-dev">
+              <div class="dev-header">// DEV PANEL — RevenueCat State</div>
+              <div class="dev-row"><span class="dev-key">entitlement</span><span class="dev-val green" id="dev-ent">premium_access</span></div>
+              <div class="dev-row"><span class="dev-key">subscribed</span><span class="dev-val green" id="dev-sub">true</span></div>
+              <div class="dev-row"><span class="dev-key">plan</span><span class="dev-val amber" id="dev-plan">annual</span></div>
+              <div class="dev-row"><span class="dev-key">trial_active</span><span class="dev-val amber" id="dev-trial">true</span></div>
+              <div class="dev-row"><span class="dev-key">trial_days_left</span><span class="dev-val amber" id="dev-days">6</span></div>
+              <div class="dev-row"><span class="dev-key">will_renew</span><span class="dev-val green">true</span></div>
+              <div class="dev-row"><span class="dev-key">sandbox</span><span class="dev-val green">true</span></div>
+              <div class="dev-divider"></div>
+              <div class="dev-log" id="devLog">
+                <span class="ok">[RC]</span> SDK initialized<br>
+                <span class="info">[RC]</span> Offerings fetched<br>
+                <span class="ok">[RC]</span> Trial started: annual<br>
+                <span class="ok">[ENT]</span> premium_access: active<br>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="phone-home-bar"></div>
+      </div>
+
+      <!-- SCREEN NAV BUTTONS -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
+        <button onclick="goScreen('home')" style="font-size:9px;padding:5px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">Home</button>
+        <button onclick="goScreen('paywall')" style="font-size:9px;padding:5px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">Paywall</button>
+        <button onclick="goScreen('premium')" style="font-size:9px;padding:5px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">Premium</button>
+        <button onclick="goScreen('dev')" style="font-size:9px;padding:5px 10px;background:var(--white);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:'DM Mono',monospace;transition:all 0.15s" onmouseover="this.style.borderColor='var(--accent)'" onmouseout="this.style.borderColor='var(--border)'">Dev Panel</button>
+      </div>
+
+      <!-- STATE TOGGLE -->
+      <div style="width:100%;background:var(--white);border:1px solid var(--border);border-radius:12px;padding:14px">
+        <div style="font-size:10px;font-weight:700;margin-bottom:10px;font-family:'DM Mono',monospace;color:var(--muted)">SIMULATE STATE</div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <button onclick="setState('subscribed')" style="font-size:10px;padding:7px 10px;background:var(--green-light);color:var(--green);border:1px solid rgba(61,122,46,0.2);border-radius:8px;cursor:pointer;font-weight:600;font-family:'DM Mono',monospace">✓ Subscribed (trial)</button>
+          <button onclick="setState('free')" style="font-size:10px;padding:7px 10px;background:var(--border);color:var(--muted);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-weight:600;font-family:'DM Mono',monospace">✕ Free (not subscribed)</button>
+          <button onclick="setState('expired')" style="font-size:10px;padding:7px 10px;background:rgba(220,38,38,0.08);color:var(--red);border:1px solid rgba(220,38,38,0.15);border-radius:8px;cursor:pointer;font-weight:600;font-family:'DM Mono',monospace">⚠ Expired / Lapsed</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: CONTENT PANELS -->
+  <div class="right-col">
+
+    <!-- OVERVIEW -->
+    <div class="panel-set active" id="ps-overview">
+      <div class="section-title">RevenueCat Integration</div>
+      <div class="section-sub">Full Apple IAP subscription integration for Nourish — paywall, entitlements, 7-day trials, restore flow, sandbox tested. Ready to ship within your 2-week launch window.</div>
+
+      <div class="cards-3">
+        <div class="info-card">
+          <div class="ic-icon">💳</div>
+          <div class="ic-title">Two Subscription Plans</div>
+          <div class="ic-body">Monthly ($4.99) and Annual ($49.99) products connected to App Store Connect via RevenueCat offerings.</div>
+          <div class="ic-tags"><span class="ic-tag">nourish.monthly</span><span class="ic-tag">nourish.annual</span></div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">🎁</div>
+          <div class="ic-title">7-Day Free Trial</div>
+          <div class="ic-body">Trial logic handled by RevenueCat — no charge for 7 days, converts automatically. Trial status displayed in app.</div>
+          <div class="ic-tags"><span class="ic-tag amber">introductory offer</span><span class="ic-tag">auto-renew</span></div>
+        </div>
+        <div class="info-card">
+          <div class="ic-icon">🔐</div>
+          <div class="ic-title">Entitlement Control</div>
+          <div class="ic-body">premium_access entitlement gates all premium features. Checked on every app launch and after any purchase event.</div>
+          <div class="ic-tags"><span class="ic-tag">premium_access</span><span class="ic-tag">feature lock</span></div>
+        </div>
+      </div>
+
+      <!-- ARCH FLOW -->
+      <div class="arch-flow">
+        <div class="arch-node"><div class="arch-node-icon">📱</div><div class="arch-node-label">Nourish App</div><div class="arch-node-sub">Base44 / React</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node"><div class="arch-node-icon">📦</div><div class="arch-node-label">RC SDK</div><div class="arch-node-sub">react-native-purchases</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node"><div class="arch-node-icon">🍎</div><div class="arch-node-label">App Store IAP</div><div class="arch-node-sub">StoreKit</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node"><div class="arch-node-icon">✅</div><div class="arch-node-label">Entitlement</div><div class="arch-node-sub">premium_access</div></div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node"><div class="arch-node-icon">🔓</div><div class="arch-node-label">Feature Unlock</div><div class="arch-node-sub">food scanner + AI</div></div>
+      </div>
+
+      <div class="cards-2">
+        <div class="info-card">
+          <div class="ic-title" style="margin-bottom:12px">Integration Checklist</div>
+          <div class="flow-steps" style="margin:0">
+            <div class="flow-step" style="padding:8px 0">
+              <div class="fs-num" style="width:20px;height:20px;font-size:10px">✓</div>
+              <div><div class="fs-title" style="font-size:12px">RevenueCat SDK installed</div></div>
+            </div>
+            <div class="flow-step" style="padding:8px 0">
+              <div class="fs-num" style="width:20px;height:20px;font-size:10px">✓</div>
+              <div><div class="fs-title" style="font-size:12px">Products linked in App Store Connect</div></div>
+            </div>
+            <div class="flow-step" style="padding:8px 0">
+              <div class="fs-num" style="width:20px;height:20px;font-size:10px">✓</div>
+              <div><div class="fs-title" style="font-size:12px">Paywall screen built</div></div>
+            </div>
+            <div class="flow-step" style="padding:8px 0">
+              <div class="fs-num" style="width:20px;height:20px;font-size:10px">✓</div>
+              <div><div class="fs-title" style="font-size:12px">Restore purchases flow</div></div>
+            </div>
+            <div class="flow-step" style="padding:8px 0">
+              <div class="fs-num" style="width:20px;height:20px;font-size:10px">✓</div>
+              <div><div class="fs-title" style="font-size:12px">Sandbox + TestFlight tested</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="ic-title" style="margin-bottom:12px">Estimated Hours</div>
+          <div class="tb-body" style="padding:0">
+            <div class="tb-row"><div class="tb-label">RC SDK setup</div><div class="tb-bar-bg"><div class="tb-bar bar-g" style="width:30%"></div></div><div class="tb-val">4 hrs</div></div>
+            <div class="tb-row"><div class="tb-label">Paywall screen</div><div class="tb-bar-bg"><div class="tb-bar bar-g" style="width:35%"></div></div><div class="tb-val">5 hrs</div></div>
+            <div class="tb-row"><div class="tb-label">Purchase + restore</div><div class="tb-bar-bg"><div class="tb-bar bar-a" style="width:25%"></div></div><div class="tb-val">4 hrs</div></div>
+            <div class="tb-row"><div class="tb-label">Entitlement logic</div><div class="tb-bar-bg"><div class="tb-bar bar-a" style="width:20%"></div></div><div class="tb-val">3 hrs</div></div>
+            <div class="tb-row"><div class="tb-label">Sandbox testing</div><div class="tb-bar-bg"><div class="tb-bar bar-b" style="width:25%"></div></div><div class="tb-val">4 hrs</div></div>
+            <div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-weight:700;font-size:12px">Total</span>
+              <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">20 hrs · $400</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INTEGRATION -->
+    <div class="panel-set" id="ps-integration">
+      <div class="section-title">Purchase Flow</div>
+      <div class="section-sub">How the RevenueCat SDK handles every step from paywall view to entitlement grant and feature unlock.</div>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="fs-num">1</div>
+          <div style="flex:1">
+            <div class="fs-title">SDK Initialization</div>
+            <div class="fs-desc">RevenueCat configured with API key on app launch. Anonymous user ID assigned. Existing entitlements checked immediately.</div>
+            <div class="fs-code">Purchases.configure({apiKey: RC_KEY})</div>
+          </div>
+          <div class="fs-time">app launch</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">2</div>
+          <div style="flex:1">
+            <div class="fs-title">Fetch Offerings</div>
+            <div class="fs-desc">RC fetches configured offerings from the dashboard. Returns monthly and annual packages with pricing, trial info, and product metadata.</div>
+            <div class="fs-code">Purchases.getOfferings()</div>
+          </div>
+          <div class="fs-time">~200ms</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">3</div>
+          <div style="flex:1">
+            <div class="fs-title">Display Paywall</div>
+            <div class="fs-desc">Paywall screen renders both plans from the offering data. Trial badge shown. User selects monthly or annual plan. CTA updates to match selection.</div>
+            <div class="fs-code">offering.availablePackages</div>
+          </div>
+          <div class="fs-time">user action</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">4</div>
+          <div style="flex:1">
+            <div class="fs-title">Purchase Triggered</div>
+            <div class="fs-desc">StoreKit purchase sheet presented via RC SDK. User authenticates with Face ID / Apple ID. 7-day trial begins immediately on success.</div>
+            <div class="fs-code">Purchases.purchasePackage(pkg)</div>
+          </div>
+          <div class="fs-time">StoreKit sheet</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">5</div>
+          <div style="flex:1">
+            <div class="fs-title">Entitlement Verified</div>
+            <div class="fs-desc">On purchase success, RC returns CustomerInfo. premium_access entitlement checked. Result stored in Zustand/Redux for instant UI response.</div>
+            <div class="fs-code">customerInfo.entitlements.active['premium_access']</div>
+          </div>
+          <div class="fs-time">instant</div>
+        </div>
+        <div class="flow-step">
+          <div class="fs-num">6</div>
+          <div style="flex:1">
+            <div class="fs-title">Features Unlocked</div>
+            <div class="fs-desc">Paywall dismissed. Food scanner and all premium screens unlocked. Trial countdown shown on home screen. App ready for App Store submission.</div>
+            <div class="fs-code">navigation.replace('HomeScreen')</div>
+          </div>
+          <div class="fs-time">complete</div>
+        </div>
+      </div>
+
+      <div class="info-card" style="margin-bottom:16px">
+        <div class="ic-title" style="margin-bottom:12px">Restore Purchases Flow</div>
+        <div class="fs-desc" style="margin-bottom:10px">When user taps "Restore Purchases" — critical for users who reinstall the app or switch devices.</div>
+        <div class="code-block" style="margin:0">
+          <div class="cb-header"><div class="cb-dot cb-r"></div><div class="cb-dot cb-y"></div><div class="cb-dot cb-g"></div><div class="cb-filename">revenuecatService.ts</div></div>
+          <div class="cb-body"><span class="kw">const</span> <span class="fn">restorePurchases</span> = <span class="kw">async</span> () => {<br>  <span class="kw">const</span> info = <span class="kw">await</span> <span class="cls">Purchases</span>.<span class="fn">restorePurchases</span>();<br>  <span class="kw">if</span> (info.entitlements.active[<span class="str">'premium_access'</span>]) {<br>    <span class="fn">dispatch</span>(<span class="fn">setEntitlement</span>(<span class="str">true</span>));<br>    <span class="fn">showToast</span>(<span class="str">'✅ Subscription restored!'</span>);<br>  } <span class="kw">else</span> {<br>    <span class="fn">showToast</span>(<span class="str">'No active subscription found'</span>);<br>  }<br>};</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CODE -->
+    <div class="panel-set" id="ps-code">
+      <div class="section-title">Implementation</div>
+      <div class="section-sub">Core RevenueCat service, subscription state store, and entitlement checking logic for the Base44 React wrapper.</div>
+
+      <div class="code-block">
+        <div class="cb-header"><div class="cb-dot cb-r"></div><div class="cb-dot cb-y"></div><div class="cb-dot cb-g"></div><div class="cb-filename">services/revenuecatService.ts</div></div>
+        <div class="cb-body">
+<span class="kw">import</span> <span class="cls">Purchases</span>, { <span class="cls">PurchasesPackage</span> } <span class="kw">from</span> <span class="str">'react-native-purchases'</span>;<br><br>
+<span class="cm">// Initialize RC SDK — call from App.tsx on mount</span><br>
+<span class="kw">export const</span> <span class="fn">initRevenueCat</span> = () => {<br>
+  <span class="cls">Purchases</span>.<span class="fn">configure</span>({ <span class="fn">apiKey</span>: <span class="cls">RC_IOS_API_KEY</span> });<br>
+};<br><br>
+<span class="cm">// Fetch subscription offerings from RC dashboard</span><br>
+<span class="kw">export const</span> <span class="fn">getOfferings</span> = <span class="kw">async</span> () => {<br>
+  <span class="kw">const</span> offerings = <span class="kw">await</span> <span class="cls">Purchases</span>.<span class="fn">getOfferings</span>();<br>
+  <span class="kw">return</span> offerings.current?.availablePackages ?? [];<br>
+};<br><br>
+<span class="cm">// Purchase a package (monthly or annual)</span><br>
+<span class="kw">export const</span> <span class="fn">purchasePackage</span> = <span class="kw">async</span> (pkg: <span class="cls">PurchasesPackage</span>) => {<br>
+  <span class="kw">const</span> { customerInfo } = <span class="kw">await</span> <span class="cls">Purchases</span>.<span class="fn">purchasePackage</span>(pkg);<br>
+  <span class="kw">return</span> <span class="fn">hasEntitlement</span>(customerInfo);<br>
+};<br><br>
+<span class="cm">// Check premium_access entitlement</span><br>
+<span class="kw">export const</span> <span class="fn">hasEntitlement</span> = (info: <span class="kw">any</span>) =><br>
+  !!info?.entitlements?.active?.[<span class="str">'premium_access'</span>];
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="cb-header"><div class="cb-dot cb-r"></div><div class="cb-dot cb-y"></div><div class="cb-dot cb-g"></div><div class="cb-filename">store/subscriptionStore.ts</div></div>
+        <div class="cb-body">
+<span class="kw">import</span> { <span class="fn">create</span> } <span class="kw">from</span> <span class="str">'zustand'</span>;<br><br>
+<span class="kw">interface</span> <span class="cls">SubscriptionState</span> {<br>
+  isSubscribed: <span class="kw">boolean</span>;<br>
+  planId: <span class="str">'monthly'</span> | <span class="str">'annual'</span> | <span class="kw">null</span>;<br>
+  trialActive: <span class="kw">boolean</span>;<br>
+  trialDaysLeft: <span class="kw">number</span>;<br>
+  entitlementActive: <span class="kw">boolean</span>;<br>
+}<br><br>
+<span class="kw">export const</span> useSubscriptionStore = <span class="fn">create</span>&lt;<span class="cls">SubscriptionState</span>&gt;((<span class="fn">set</span>) => ({<br>
+  isSubscribed: <span class="num">false</span>,<br>
+  planId: <span class="kw">null</span>,<br>
+  trialActive: <span class="num">false</span>,<br>
+  trialDaysLeft: <span class="num">7</span>,<br>
+  entitlementActive: <span class="num">false</span>,<br>
+  setSubscribed: (plan, trial) =><br>
+    <span class="fn">set</span>({ isSubscribed: <span class="num">true</span>, planId: plan,<br>
+           trialActive: trial, entitlementActive: <span class="num">true</span> }),<br>
+}));
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="cb-header"><div class="cb-dot cb-r"></div><div class="cb-dot cb-y"></div><div class="cb-dot cb-g"></div><div class="cb-filename">screens/PaywallScreen.tsx (key section)</div></div>
+        <div class="cb-body">
+<span class="cm">// Fetch offerings and render paywall</span><br>
+<span class="kw">const</span> [packages, setPackages] = <span class="fn">useState</span>([]);<br><br>
+<span class="fn">useEffect</span>(() => {<br>
+  <span class="fn">getOfferings</span>().<span class="fn">then</span>(setPackages);<br>}, []);<br><br>
+<span class="kw">const</span> <span class="fn">handlePurchase</span> = <span class="kw">async</span> (pkg) => {<br>
+  <span class="fn">setLoading</span>(<span class="num">true</span>);<br>
+  <span class="kw">const</span> entitled = <span class="kw">await</span> <span class="fn">purchasePackage</span>(pkg);<br>
+  <span class="kw">if</span> (entitled) {<br>
+    store.<span class="fn">setSubscribed</span>(pkg.identifier, <span class="num">true</span>);<br>
+    navigation.<span class="fn">replace</span>(<span class="str">'HomeScreen'</span>);<br>
+  }<br>
+  <span class="fn">setLoading</span>(<span class="num">false</span>);<br>
+};
+        </div>
+      </div>
+    </div>
+
+    <!-- DELIVERY PLAN -->
+    <div class="panel-set" id="ps-plan">
+      <div class="section-title">Delivery Plan</div>
+      <div class="section-sub">Full integration in 2 weeks. Milestone-gated so you always know exactly what's been delivered before the next step begins.</div>
+
+      <div class="cards-2" style="margin-bottom:24px">
+        <div class="info-card" style="border-color:rgba(61,122,46,0.3);background:var(--green-light)">
+          <div class="ic-title">Week 1 — Integration</div>
+          <div class="ic-body" style="margin-top:8px">
+            <div style="margin-bottom:6px">✓ RC SDK installed + configured</div>
+            <div style="margin-bottom:6px">✓ Both products connected via offerings</div>
+            <div style="margin-bottom:6px">✓ Paywall screen built + styled</div>
+            <div style="margin-bottom:6px">✓ Purchase + restore flows wired</div>
+            <div>✓ Entitlement logic + feature gating</div>
+          </div>
+        </div>
+        <div class="info-card">
+          <div class="ic-title">Week 2 — Testing + Ship</div>
+          <div class="ic-body" style="margin-top:8px">
+            <div style="margin-bottom:6px">✓ Sandbox testing all flows</div>
+            <div style="margin-bottom:6px">✓ TestFlight build + trial validation</div>
+            <div style="margin-bottom:6px">✓ Edge cases: cancel, expire, lapse</div>
+            <div style="margin-bottom:6px">✓ Brief documentation delivered</div>
+            <div>✓ Ready for App Store submission</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-bar">
+        <div class="tb-header">Hours Breakdown</div>
+        <div class="tb-body">
+          <div class="tb-row"><div class="tb-label">SDK setup + config</div><div class="tb-bar-bg"><div class="tb-bar bar-g" style="width:30%"></div></div><div class="tb-val">4 hrs</div></div>
+          <div class="tb-row"><div class="tb-label">Paywall UI + plans</div><div class="tb-bar-bg"><div class="tb-bar bar-g" style="width:38%"></div></div><div class="tb-val">5 hrs</div></div>
+          <div class="tb-row"><div class="tb-label">Purchase + restore</div><div class="tb-bar-bg"><div class="tb-bar bar-a" style="width:30%"></div></div><div class="tb-val">4 hrs</div></div>
+          <div class="tb-row"><div class="tb-label">Entitlement + gating</div><div class="tb-bar-bg"><div class="tb-bar bar-a" style="width:23%"></div></div><div class="tb-val">3 hrs</div></div>
+          <div class="tb-row"><div class="tb-label">Sandbox + TestFlight</div><div class="tb-bar-bg"><div class="tb-bar bar-b" style="width:30%"></div></div><div class="tb-val">4 hrs</div></div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:space-between">
+            <div><span style="font-weight:700">Total: 20 hrs · $400</span><span style="font-size:11px;color:var(--muted);margin-left:8px">at $20/hr</span></div>
+            <div class="status-badge sb-green"><div class="sb-dot"></div>Ready to start</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="ic-title" style="margin-bottom:10px">What you get at delivery</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--muted)">
+          <div>📱 Working RC integration</div>
+          <div>💳 Paywall with both plans</div>
+          <div>🎁 Trial logic confirmed</div>
+          <div>↩ Restore purchases working</div>
+          <div>🔐 Entitlement gating live</div>
+          <div>🧪 Sandbox + TestFlight tested</div>
+          <div>📄 Brief implementation docs</div>
+          <div>✅ App Store ready</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-ico" id="tIco">✅</div>
+  <div>
+    <div class="toast-title" id="tTitle">Done</div>
+    <div class="toast-sub" id="tSub">—</div>
+  </div>
+</div>
+
+<script>
+// ── TABS ──
+function setTab(id, el) {
+  document.querySelectorAll('.panel-set').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tb-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('ps-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// ── SCREENS ──
+function goScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('scr-' + id).classList.add('active');
+}
+
+// ── PLAN SELECT ──
+let selectedPlan = 'annual';
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.getElementById('plan-monthly').classList.toggle('selected', plan === 'monthly');
+  document.getElementById('plan-annual').classList.toggle('selected', plan === 'annual');
+  document.getElementById('paywall-cta').textContent = plan === 'annual'
+    ? 'Start Free Trial (Annual) →'
+    : 'Start Free Trial (Monthly) →';
+}
+
+// ── PURCHASE SIMULATION ──
+function purchasePlan() {
+  const btn = document.getElementById('paywall-cta');
+  btn.textContent = '⟳ Processing...';
+  setTimeout(() => {
+    setState('subscribed', selectedPlan);
+    goScreen('home');
+    showToast('🎉', 'Subscription started!', `7-day trial active · ${selectedPlan} plan`);
+    btn.textContent = 'Start Free Trial →';
+    addDevLog(`[RC] Purchase success: nourish.${selectedPlan}`);
+    addDevLog(`[ENT] premium_access: active (trial)`);
+  }, 1200);
+}
+
+// ── RESTORE ──
+function restorePurchases() {
+  showToast('↩', 'Restoring...', 'Checking active subscriptions');
+  setTimeout(() => {
+    showToast('✅', 'Purchases restored', 'premium_access entitlement active');
+    addDevLog('[RC] restorePurchases() success');
+  }, 1500);
+}
+
+// ── STATE SIMULATION ──
+function setState(state, plan) {
+  const planName = plan || selectedPlan || 'annual';
+  if (state === 'subscribed') {
+    document.getElementById('home-sub-status').textContent = 'Trial Active';
+    document.getElementById('home-sub-status').className = 's-val active';
+    document.getElementById('home-plan').textContent = planName.charAt(0).toUpperCase() + planName.slice(1);
+    document.getElementById('home-trial').textContent = '6 days left';
+    document.getElementById('home-entitlement').textContent = '✓ premium_access';
+    document.getElementById('home-entitlement').className = 's-val active';
+    document.getElementById('premium-locked').style.display = 'none';
+    document.getElementById('premium-unlocked').style.display = 'block';
+    document.getElementById('dev-ent').textContent = 'premium_access';
+    document.getElementById('dev-ent').className = 'dev-val green';
+    document.getElementById('dev-sub').textContent = 'true';
+    document.getElementById('dev-sub').className = 'dev-val green';
+    document.getElementById('dev-plan').textContent = planName;
+    document.getElementById('dev-trial').textContent = 'true';
+    document.getElementById('dev-days').textContent = '6';
+    showToast('✅', 'State: Subscribed', 'premium_access active · trial running');
+  } else if (state === 'free') {
+    document.getElementById('home-sub-status').textContent = 'Not subscribed';
+    document.getElementById('home-sub-status').className = 's-val locked';
+    document.getElementById('home-plan').textContent = '—';
+    document.getElementById('home-trial').textContent = '—';
+    document.getElementById('home-entitlement').textContent = '✕ locked';
+    document.getElementById('home-entitlement').className = 's-val locked';
+    document.getElementById('premium-locked').style.display = 'flex';
+    document.getElementById('premium-unlocked').style.display = 'none';
+    document.getElementById('dev-ent').textContent = 'none';
+    document.getElementById('dev-ent').className = 'dev-val red';
+    document.getElementById('dev-sub').textContent = 'false';
+    document.getElementById('dev-sub').className = 'dev-val red';
+    document.getElementById('dev-plan').textContent = 'null';
+    document.getElementById('dev-trial').textContent = 'false';
+    document.getElementById('dev-days').textContent = '0';
+    showToast('🔒', 'State: Free user', 'No active entitlement');
+  } else if (state === 'expired') {
+    document.getElementById('home-sub-status').textContent = 'Expired';
+    document.getElementById('home-sub-status').className = 's-val locked';
+    document.getElementById('home-entitlement').textContent = '⚠ expired';
+    document.getElementById('home-entitlement').className = 's-val trial';
+    document.getElementById('premium-locked').style.display = 'flex';
+    document.getElementById('premium-unlocked').style.display = 'none';
+    document.getElementById('dev-ent').textContent = 'expired';
+    document.getElementById('dev-ent').className = 'dev-val amber';
+    showToast('⚠️', 'State: Expired', 'Subscription lapsed — show paywall');
+  }
+}
+
+// ── DEV LOG ──
+function addDevLog(msg) {
+  const log = document.getElementById('devLog');
+  const cls = msg.includes('[RC]') ? 'info' : msg.includes('[ENT]') ? 'ok' : '';
+  log.innerHTML += `<span class="${cls}">${msg}</span><br>`;
+}
+
+// ── TOAST ──
+function showToast(ico, title, sub) {
+  document.getElementById('tIco').textContent = ico;
+  document.getElementById('tTitle').textContent = title;
+  document.getElementById('tSub').textContent = sub;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Init premium unlocked (trial state)
+document.getElementById('premium-unlocked').style.display = 'block';
+document.getElementById('premium-locked').style.display = 'none';
+</script>
+</body>
+</html>
